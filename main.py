@@ -9,11 +9,15 @@ import requests
 #     for tag in tags:
 #         print(tag.text)
 
+max_price = int(input('Put your maximum price: '))
+print(f'Searching bikes under Rs {max_price}')
+
 url = 'https://ikman.lk/en/ads/q/sri-lanka/motorcycle'
 html_text = requests.get(url).text
 # print(html_text.encode('utf-8'))
 
-soup = BeautifulSoup(html_text, 'lxml')
+# soup = BeautifulSoup(html_text, 'lxml')
+soup = BeautifulSoup(html_text, 'html.parser')
 bikes = soup.find_all('li', class_='normal--2QYVk')
 
 for bike in bikes:
@@ -37,7 +41,7 @@ for bike in bikes:
 
         location_element = bike.find('div', class_='description--2-ez3')
         if location_element:
-            location = location_element.text
+            location = location_element.text.split()[0].strip(',')
         else:
             location = "N/A"
 
@@ -47,7 +51,13 @@ for bike in bikes:
         else:
             price = "N/A"
 
-        print("Bike Model:", bike_model)
-        print("Location:", location)
-        print("Price:", price)
-        print()
+        price_numeric = int(''.join(filter(str.isdigit, price))) if price != "N/A" else 0
+
+        link = bike.a['href']
+
+        if price_numeric <= max_price:
+            print("Bike Model:", bike_model)
+            print("Location:", location)
+            print("Price:", price)
+            print(f"More Info: https://ikman.lk{link}")
+            print()
